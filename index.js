@@ -27,6 +27,7 @@ async function run() {
     // await client.connect();
 
     const servicesDB = client.db("doctorDB").collection("services");
+    const bookingDB = client.db("doctorDB").collection("booking");
 
     app.get("/", (req, res) => {
       res.send("Surver Running successfully");
@@ -42,6 +43,17 @@ async function run() {
       const id = req.params.id;
       const query = { _id: new ObjectId(id) };
       const result = await servicesDB.findOne(query);
+      res.send(result);
+    });
+
+    app.get("/bookings", async (req, res) => {
+      const cursor = bookingDB.find();
+      const result = await cursor.toArray();
+      res.send(result);
+    });
+    app.post("/bookings", async (req, res) => {
+      const booking = req.body;
+      const result = await bookingDB.insertOne(booking);
       res.send(result);
     });
 
