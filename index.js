@@ -1,13 +1,21 @@
 const express = require("express");
+var jwt = require("jsonwebtoken");
 const cors = require("cors");
+const cookieparser = require("cookie-parser");
 require("dotenv").config();
 const app = express();
 const port = process.env.PORT || 3300;
 
 // Middleware
 app.use(express.json());
-app.use(cors());
+const corsOptions = {
+  origin: ["http://localhost:5173"],
+  credentials: true, //access-control-allow-credentials:true
+};
 
+app.use(cors(corsOptions));
+// app.use(cors());
+app.use(cookieparser());
 //
 //
 
@@ -33,6 +41,20 @@ async function run() {
       res.send("Surver Running successfully");
     });
 
+    // auth related methods
+    app.post("/jwt", async (req, res) => {
+      const user = req.body;
+      const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
+        expiresIn: "1h",
+      });
+      res
+        .cookie("token", token, {
+          httpOnly: true,
+          secure: false,
+        })
+        .send({ success: true });
+    });
+
     app.get("/services", async (req, res) => {
       const cursor = servicesDB.find();
       const result = await cursor.toArray();
@@ -47,6 +69,8 @@ async function run() {
     });
 
     app.get("/bookings", async (req, res) => {
+      // console.log("token", req.cookies.token);
+
       let query = {};
       if (req.query?.email) {
         query = { email: req.query.email };
