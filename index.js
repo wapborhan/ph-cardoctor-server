@@ -58,9 +58,11 @@ async function run() {
     // auth related methods
     app.post("/jwt", async (req, res) => {
       const user = req.body;
+      // console.log(user);
       const token = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
         expiresIn: "1h",
       });
+      // console.log(token);
       res
         .cookie("token", token, {
           httpOnly: true,
@@ -123,6 +125,11 @@ async function run() {
       const query = { _id: new ObjectId(id) };
       const result = await bookingDB.deleteOne(query);
       res.send(result);
+    });
+
+    app.post("/logout", async (req, res) => {
+      const user = req.body;
+      res.clearCookie("token", { maxAge: 0 }).send({ success: true });
     });
 
     await client.db("admin").command({ ping: 1 });
