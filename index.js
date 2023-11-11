@@ -72,7 +72,16 @@ async function run() {
     });
 
     app.get("/services", async (req, res) => {
-      const cursor = servicesDB.find();
+      const filter = req.query;
+      const query = {
+        // price: { gte: 300, lt: 100 },
+      };
+      const options = {
+        sort: {
+          price: filter.sort === "asc" ? 1 : -1,
+        },
+      };
+      const cursor = servicesDB.find(query, options);
       const result = await cursor.toArray();
       res.send(result);
     });
